@@ -1,0 +1,305 @@
+import PIL
+from PIL import Image
+from cv2 import cv2
+import numpy as np
+import random
+import os
+from scipy import ndarray
+import skimage as sk
+from skimage import transform
+from skimage import util
+import skimage.io
+from skimage import img_as_ubyte
+from pathlib import Path
+
+class ImageHandler:
+
+    def __init__(self, _imagePath = ""):
+        self.imagePath = _imagePath
+
+        self.imageArray = None
+
+
+    def crop(self, path, input, height, width, k, page, area):
+        im = Image.open(input)
+        imgwidth, imgheight = im.size
+        for i in range(0,imgheight,height):
+            for j in range(0,imgwidth,width):
+                box = (j, i, j+width, i+height)
+                a = im.crop(box)
+                try:
+                    o = a.crop(area)
+                    o.save(os.path.join(path,"PNG","%s" % page,"IMG-%s.png" % k))
+                except:
+                    pass
+
+
+    def random_rotation(self, image_array: ndarray):
+    # pick a random degree of rotation between 25% on the left and 25% on the right
+        random_degree = random.uniform(-25, 25)
+        return sk.transform.rotate(image_array, random_degree)
+
+    def random_noise(self, image_array: ndarray):
+        # add random noise to the image
+        return sk.util.random_noise(image_array)
+
+    def horizontal_flip(self, image_array: ndarray):
+        # horizontal flip doesn't need skimage, it's easy as flipping the image array of pixels !
+        return image_array[:, ::-1]
+
+
+    '''
+    Given a folder, every image in that folders gets transform into an array and then saved in a file as a row
+    The final file is full of rows, each representing an image. 
+    
+    def createPixelFileArray(self):
+
+        folder_path = Path('ImageFiles', 'AugData')
+
+        images = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+
+        for i in range(len(images)):
+            print("Image", images[i])
+            image_path = images[i]
+            # Convert image into 28x28
+            self.resizeImage(image_path) 
+            img_array = self.createImageArray(image_path)
+            
+            #writes array into file
+            with open("data.txt", 'a') as f:
+                self.saveArrayIntoFile(img_array, f)
+    '''        
+            
+    '''
+    Method used to generate images in a 28 * 28 size, with gray scales.
+
+    '''        
+    def generateData(self):
+        # images path
+        #images_path = 'input/'
+        images_path = 'ImageFiles/RawDataTest/'
+        output_path = 'ImageFiles/DataTest/'
+
+        # resize parameters
+        width_size = 28
+        height_size = 28
+
+        # resize process
+        images = os.listdir(images_path)
+        resized_images = []
+        flattened_images = []
+
+        # operations
+        for i in images:
+            current_image = images_path + i
+            # open the image in grayscale
+            image_array = cv2.imread(current_image, 0)
+            # resize image
+            resized_image = cv2.resize(image_array, (width_size, height_size), cv2.INTER_LINEAR)
+            # add results
+            resized_images.append(resized_image)
+            flattened_images.append(resized_image.flatten())
+
+            cv2.imwrite(output_path + i , resized_image)
+
+            #safe image in txt
+            #with open("data.txt", 'a') as f:
+            #    self.saveArrayIntoFile(resized_image.flatten(), f)
+            
+
+        '''
+        Given RRDA_dataA
+
+        Returns a 5 element array, => [ 1 0 0 0 0] which means, A.
+
+        '''
+    def getType(self, string):
+        value = []
+        if "dataA" in string:
+            value = [1, 0, 0, 0, 0]
+        elif "dataB" in string:
+            value = [0, 1, 0, 0, 0]
+        elif "dataC" in string:
+            value = [0, 0, 1, 0, 0]
+        elif "dataD" in string:
+            value = [0, 0, 0, 1, 0]
+        elif "dataE" in string:
+            value = [0, 0, 0, 0, 1]
+
+        return value
+
+
+
+
+
+    def saveArrayIntoFile(self, array, f):
+        for item in array:
+            f.write("%s " % item)
+        f.write("\n")
+        
+    
+    def generateMoreData(self):
+        # our folder path containing some images
+        
+        folder_path = Path('ImageFiles', 'DataTest')
+
+        
+        # new folder path
+        folder_path_aug = Path('ImageFiles', 'AugDataTest')
+
+        # the number of file to generate
+        num_files_desired = 10
+
+        # loop on all files of the folder and build a list of files paths
+        images = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+
+        imageNames = os.listdir(folder_path)
+
+        num_generated_files = 0
+        
+        counterName = 0
+
+        for image in images:
+            num_generated_files = 0
+
+            while num_generated_files <= num_files_desired:
+                print("Generating: ", num_generated_files)
+                # random image from the folder
+                image_path = image
+
+                # read image as an two dimensional array of pixels
+                image_to_transform = sk.io.imread(image_path)
+
+                transformed_image = self.random_rotation(image_to_transform)
+                
+                # define a name for our new file
+                new_file_path = '%s\\TEST_%s%s.jpg' % (folder_path_aug, imageNames[counterName].rstrip('.jpg') ,num_generated_files)
+                #new_file_path = '%s\\RRDA_%s%s.jpg' % (folder_path_aug, imageNames[counterName] ,num_generated_files)
+                #new_file_path = '%s%s.jpg' % (image_path.rstrip('.jpg'), num_generated_files)
+
+
+                # write image to the disk
+                sk.io.imsave(new_file_path, img_as_ubyte(transformed_image))
+                num_generated_files += 1
+            counterName += 1
+
+    def generateMoreDataSimple(self):
+        # our folder path containing some images
+        
+        folder_path = Path('ImageFiles', 'DataTest')
+
+        
+        # new folder path
+        folder_path_aug = Path('ImageFiles', 'AugDataTest')
+
+        # the number of file to generate
+        num_files_desired = 10
+
+        # loop on all files of the folder and build a list of files paths
+        images = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+
+        imageNames = os.listdir(folder_path)
+
+        num_generated_files = 0
+        
+        counterName = 0
+
+        for image in images:
+            num_generated_files = 0
+
+            while num_generated_files <= num_files_desired:
+                print("Generating: ", num_generated_files)
+                # random image from the folder
+                image_path = image
+
+                # read image as an two dimensional array of pixels
+                image_to_transform = sk.io.imread(image_path)
+
+                #transformed_image = self.random_rotation(image_to_transform)
+                
+                # define a name for our new file
+                new_file_path = '%s\\TEST_%s%s.jpg' % (folder_path_aug, imageNames[counterName].rstrip('.jpg') ,num_generated_files)
+                #new_file_path = '%s\\RRDA_%s%s.jpg' % (folder_path_aug, imageNames[counterName] ,num_generated_files)
+                #new_file_path = '%s%s.jpg' % (image_path.rstrip('.jpg'), num_generated_files)
+
+
+                # write image to the disk
+                sk.io.imsave(new_file_path, img_as_ubyte(image_to_transform))
+                num_generated_files += 1
+            counterName += 1
+
+    def createAugData(self):
+        # our folder path containing some images
+        
+        folder_path = Path('ImageFiles', 'Data')
+
+        # new folder path
+        folder_path_aug = Path('ImageFiles', 'AugData')
+
+        # the number of file to generate
+        num_files_desired = 2
+
+        # loop on all files of the folder and build a list of files paths
+        images = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+
+        num_generated_files = 0
+
+        while num_generated_files <= num_files_desired:
+            print("Generating: ", num_generated_files)
+            # random image from the folder
+            image_path = random.choice(images)
+
+            # read image as an two dimensional array of pixels
+            image_to_transform = sk.io.imread(image_path)
+
+            # dictionary of the transformations functions we defined earlier
+            available_transformations = {
+                'rotate': self.random_noise,
+                'noise': self.random_rotation
+                #'horizontal_flip': self.horizontal_flip
+            }
+ 
+            # random num of transformations to apply
+            #num_transformations_to_apply = random.randint(1, len(available_transformations))
+
+            num_transformations = 0
+            transformed_image = None
+            while num_transformations < 1:
+                # choose a random transformation to apply for a single image
+                key = random.choice(list(available_transformations))
+                transformed_image = available_transformations[key](image_to_transform)
+                num_transformations += 1
+
+                # define a name for our new file
+                new_file_path = '%s\\augmented_image_%s.jpg' % (folder_path_aug, num_generated_files)
+
+                # write image to the disk
+                sk.io.imsave(new_file_path, img_as_ubyte(transformed_image))
+                            
+
+
+    #def generateBatch(size):
+
+
+
+
+'''
+l = []
+
+for i in range(28*28):
+    l.append(1 + i)
+
+with open("data.txt", 'a') as f:
+        for item in l:
+            f.write("%s " % item)
+        f.write("\n")
+
+'''
+
+img_hand = ImageHandler()
+img_hand.generateMoreData()
+#img_hand.generateData()
+
+
+
+

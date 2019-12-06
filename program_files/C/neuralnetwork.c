@@ -9,54 +9,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
-#include <neuralnetwork.h>
+
+#include "neuralnetwork.h"
+//#include "header/mnist_file.h"
 
 #define PIXEL_SCALE(x) (((double) (x)) / 255.0f)
-
-
-
-
-double* neural_network_softmax(double * activations, int length)
-{
-    int i;
-    double sum, max;
-
-    for (i = 1, max = activations[0]; i < length; i++) {
-        if (activations[i] > max) {
-            max = activations[i];
-        }
-    }
-
-    for (i = 0, sum = 0; i < length; i++) {
-        activations[i] = exp(activations[i] - max);
-        sum += activations[i];
-    }
-
-    for (i = 0; i < length; i++) {
-        activations[i] /= sum;
-    }
-    return activations;
-}
 
 
 /*
 Activation Function
 Derivative of AF
 */
+double sigmoid(double x) {
+    return 1 / (1 + exp(-x)); 
+}
 
-const static double gain = 0.001;
+double dSigmoid(double x) {
+    return sigmoid(x) * (1 - sigmoid(x));
+}
 
-//double sigmoid(double x) { return 1 / (1 + exp(-x * gain)); }
-double sigmoid(double x) { return 1 / (1 + exp(-x * gain)); }
-double dSigmoid(double x) { return sigmoid(x) * (1 - sigmoid(x)); }
-double init_weight() { return ((double)rand())/((double)RAND_MAX); }
+double init_weight() {
+    return ((double)rand())/((double)RAND_MAX); 
+}
+
+
 
 /*
 Method used to shuffle the order of an array
 */
-void shuffle(int *array, size_t n)
-{
+void shuffle(int *array, size_t n) {
     if (n > 1)
     {
         size_t i;
