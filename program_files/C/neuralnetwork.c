@@ -169,7 +169,7 @@ char* testing_get_letter(double* output) {
 
     char* letter;
 
-    for (int i =0; i < numOutputs; i ++) {
+    for (int i =0; i < num_output_nodes; i ++) {
         if (output[i] > highest) {
             letter_pos = i;
             highest = output[i];
@@ -212,25 +212,25 @@ void testing_data(double training_inputs[], double training_outputs[], int num_i
 
     
     
-    int numInputs = 784;
-    int numOutputs = 5;
+    int num_input_nodes = 784;
+    int num_output_nodes = 5;
 
 
-    double hiddenLayer[numHiddenNodes];
-    double* outputLayer= malloc(sizeof(double) * numOutputs) ; //[numOutputs];
+    double hiddenLayer[num_hidden_nodes];
+    double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
     
-    double* hiddenLayerBias = malloc(sizeof(double) * numHiddenNodes);
-    double* outputLayerBias= malloc(sizeof(double) * numOutputs);
+    double* hiddenLayerBias = malloc(sizeof(double) * num_hidden_nodes);
+    double* outputLayerBias= malloc(sizeof(double) * num_output_nodes);
 
-    // hiddenWeights[numInputs][numHiddenNodes]
-    double* hiddenWeights = malloc( sizeof(double) * numInputs * numHiddenNodes);
-    //double outputWeights[numHiddenNodes][numOutputs];
-    double* outputWeights = malloc(sizeof(double) * numHiddenNodes * numOutputs);
+    // hiddenWeights[num_input_nodes][num_hidden_nodes]
+    double* hiddenWeights = malloc( sizeof(double) * num_input_nodes * num_hidden_nodes);
+    //double outputWeights[num_hidden_nodes][num_output_nodes];
+    double* outputWeights = malloc(sizeof(double) * num_hidden_nodes * num_output_nodes);
    
-    hiddenWeights = loadWeights(numInputs, numHiddenNodes,"W_Data/weightsHidden.dat" , hiddenWeights);
-    outputWeights = loadWeights(numHiddenNodes, numOutputs, "W_Data/weightsHidden.dat", outputWeights);
-    hiddenLayerBias = loadBias(numHiddenNodes, "W_Data/bias_hidden.dat");
-    outputLayerBias = loadBias(numOutputs,"W_Data/bias_output.dat");
+    hiddenWeights = loadWeights(num_input_nodes, num_hidden_nodes,"W_Data/weightsHidden.dat" , hiddenWeights);
+    outputWeights = loadWeights(num_hidden_nodes, num_output_nodes, "W_Data/weightsHidden.dat", outputWeights);
+    hiddenLayerBias = loadBias(num_hidden_nodes, "W_Data/bias_hidden.dat");
+    outputLayerBias = loadBias(num_output_nodes,"W_Data/bias_output.dat");
 
     
     int i;
@@ -242,22 +242,22 @@ void testing_data(double training_inputs[], double training_outputs[], int num_i
             
             // Forward pass (only - testing)
             
-            for (int j=0; j<numHiddenNodes; j++) {
+            for (int j=0; j < num_hidden_nodes; j++) {
                 double activation=hiddenLayerBias[j];
-                 for (int k=0; k<numInputs; k++) {
-                    activation+= ( PIXEL_SCALE(*(training_inputs +i*numInputs + k))  * hiddenWeights[k *numHiddenNodes + j]);
+                 for (int k=0; k<num_input_nodes; k++) {
+                    activation+= ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k *num_hidden_nodes + j]);
                 }
                 hiddenLayer[j] = sigmoid(activation);
             }
             
-            for (int j=0; j<numOutputs; j++) {
+            for (int j=0; j<num_output_nodes; j++) {
                 double activation=outputLayerBias[j];
-                for (int k=0; k<numHiddenNodes; k++) {
-                    activation += hiddenLayer[k]*outputWeights[k * numOutputs + j];
+                for (int k=0; k < num_hidden_nodes; k++) {
+                    activation += hiddenLayer[k]*outputWeights[k * num_output_nodes + j];
                 }
                 outputLayer[j] = sigmoid(activation);
             }
-            printf("Label: %s", testing_get_letter(training_outputs +i*numOutputs));
+            printf("Label: %s", testing_get_letter(training_outputs +i*num_output_nodes));
             printf("Label: %s", testing_get_letter(outputLayer));
             
 
@@ -277,8 +277,8 @@ void testing_data(double training_inputs[], double training_outputs[], int num_i
 
 int correct_guess(double* network_output, double* label, int img ) {
     int correct = 1;
-    for (int i = 0; i < numOutputs; i++) {
-        if (network_output[i] != label[img * numOutputs + i ]) {
+    for (int i = 0; i < num_output_nodes; i++) {
+        if (network_output[i] != label[img * num_output_nodes + i ]) {
             correct = 0;
         }
     }
@@ -302,43 +302,43 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
     
     {
     
-    int numInputs = 784;
-    int numOutputs = 5;
+    int num_input_nodes = 784;
+    int num_output_nodes = 5;
 
 
-    double hiddenLayer[numHiddenNodes];
-    double* outputLayer= malloc(sizeof(double) * numOutputs) ; //[numOutputs];
+    double hiddenLayer[num_hidden_nodes];
+    double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
     
-    double* hiddenLayerBias = malloc(sizeof(double) * numHiddenNodes);
-    double* outputLayerBias= malloc(sizeof(double) * numOutputs);
+    double* hiddenLayerBias = malloc(sizeof(double) * num_hidden_nodes);
+    double* outputLayerBias= malloc(sizeof(double) * num_output_nodes);
 
-    double* hiddenWeights = malloc( sizeof(double) * numInputs * numHiddenNodes);\
-    double* outputWeights = malloc(sizeof(double) * numHiddenNodes * numOutputs);
+    double* hiddenWeights = malloc( sizeof(double) * num_input_nodes * num_hidden_nodes);\
+    double* outputWeights = malloc(sizeof(double) * num_hidden_nodes * num_output_nodes);
    
    // Sets randoms if flag
    if (batch == 0) {
-        for (int i=0; i<numInputs; i++) {
-            for (int j=0; j<numHiddenNodes; j++) {
-                hiddenWeights[i *numHiddenNodes + j] = init_weight();
+        for (int i=0; i<num_input_nodes; i++) {
+            for (int j=0; j<num_hidden_nodes; j++) {
+                hiddenWeights[i *num_hidden_nodes + j] = init_weight();
             }
         }
-        for (int i=0; i<numHiddenNodes; i++) {
+        for (int i=0; i<num_hidden_nodes; i++) {
             hiddenLayerBias[i] = init_weight();
-            for (int j=0; j<numOutputs; j++) {
-                outputWeights[i * numOutputs + j] = init_weight();
+            for (int j=0; j<num_output_nodes; j++) {
+                outputWeights[i * num_output_nodes + j] = init_weight();
             }
         }
-        for (int i=0; i<numOutputs; i++) {
+        for (int i=0; i<num_output_nodes; i++) {
         outputLayerBias[i] = init_weight();
     }
 
 
    } else {
        
-       hiddenWeights = loadWeights(numInputs, numHiddenNodes,"W_Data/weightsHidden.dat" , hiddenWeights);
-       outputWeights = loadWeights(numHiddenNodes, numOutputs, "W_Data/weightsHidden.dat", outputWeights);
-       hiddenLayerBias = loadBias(numHiddenNodes, "W_Data/bias_hidden.dat");
-       outputLayerBias = loadBias(numOutputs,"W_Data/bias_output.dat");
+       hiddenWeights = loadWeights(num_input_nodes, num_hidden_nodes,"W_Data/weightsHidden.dat" , hiddenWeights);
+       outputWeights = loadWeights(num_hidden_nodes, num_output_nodes, "W_Data/weightsHidden.dat", outputWeights);
+       hiddenLayerBias = loadBias(num_hidden_nodes, "W_Data/bias_hidden.dat");
+       outputLayerBias = loadBias(num_output_nodes,"W_Data/bias_output.dat");
 
    }
 
@@ -364,18 +364,18 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
             i = trainingSetOrder[x];
 
             
-            for (int j=0; j<numHiddenNodes; j++) {
+            for (int j=0; j<num_hidden_nodes; j++) {
                 double activation=hiddenLayerBias[j];
-                 for (int k=0; k<numInputs; k++) {
-                    activation+= ( PIXEL_SCALE(*(training_inputs +i*numInputs + k))  * hiddenWeights[k *numHiddenNodes + j]);
+                 for (int k=0; k<num_input_nodes; k++) {
+                    activation+= ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k *num_hidden_nodes + j]);
                 }
                 hiddenLayer[j] = sigmoid(activation);
             }
             
-            for (int j=0; j<numOutputs; j++) {
+            for (int j=0; j<num_output_nodes; j++) {
                 double activation=outputLayerBias[j];
-                for (int k=0; k<numHiddenNodes; k++) {
-                    activation += hiddenLayer[k]*outputWeights[k * numOutputs + j];
+                for (int k=0; k<num_hidden_nodes; k++) {
+                    activation += hiddenLayer[k]*outputWeights[k * num_output_nodes + j];
                 }
                 outputLayer[j] = sigmoid(activation);
             }
@@ -393,40 +393,40 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
                 printf("Batch:%d\n", batch);
                 printf("         Output:%lf,%lf,%lf,%lf,%lf\n", outputLayer[0], outputLayer[1], outputLayer[2], outputLayer[3], outputLayer[4]);
                 printf("Expected Output:%lf,%lf,%lf,%lf,%lf\n", 
-                training_outputs[i * numOutputs + 0], training_outputs[i * numOutputs + 1], training_outputs[i * numOutputs + 2],
-                training_outputs[i * numOutputs + 3],training_outputs[i * numOutputs + 4]);
+                training_outputs[i * num_output_nodes + 0], training_outputs[i * num_output_nodes + 1], training_outputs[i * num_output_nodes + 2],
+                training_outputs[i * num_output_nodes + 3],training_outputs[i * num_output_nodes + 4]);
                 }
             //*/
            
            // Backprop
         
     
-            double deltaOutput[numOutputs];
-            for (int j=0; j<numOutputs; j++) {
-                double errorOutput = (*(training_outputs +i*numOutputs + j) -outputLayer[j]);
+            double deltaOutput[num_output_nodes];
+            for (int j=0; j<num_output_nodes; j++) {
+                double errorOutput = (*(training_outputs +i*num_output_nodes + j) -outputLayer[j]);
                 deltaOutput[j] = errorOutput*dSigmoid(outputLayer[j]);
             }
             
-            double deltaHidden[numHiddenNodes];
-            for (int j=0; j<numHiddenNodes; j++) {
+            double deltaHidden[num_hidden_nodes];
+            for (int j=0; j<num_hidden_nodes; j++) {
                 double errorHidden = 0.0f;
-                for(int k=0; k<numOutputs; k++) {
-                    errorHidden += deltaOutput[k] * outputWeights[j * numOutputs +k];
+                for(int k=0; k<num_output_nodes; k++) {
+                    errorHidden += deltaOutput[k] * outputWeights[j * num_output_nodes +k];
                 }
                 deltaHidden[j] = errorHidden*dSigmoid(hiddenLayer[j]);
             }
             
-            for (int j=0; j<numOutputs; j++) {
+            for (int j=0; j<num_output_nodes; j++) {
                 outputLayerBias[j] += deltaOutput[j]*lr;
-                for (int k=0; k<numHiddenNodes; k++) {
-                    outputWeights[k * numOutputs + j]+=hiddenLayer[k] * deltaOutput[j] * lr;
+                for (int k=0; k<num_hidden_nodes; k++) {
+                    outputWeights[k * num_output_nodes + j]+=hiddenLayer[k] * deltaOutput[j] * lr;
                 }
             }
             
-            for (int j=0; j<numHiddenNodes; j++) {
+            for (int j=0; j<num_hidden_nodes; j++) {
                 hiddenLayerBias[j] += deltaHidden[j]*lr;
-                for(int k=0; k<numInputs; k++) {
-                    hiddenWeights[k *numHiddenNodes + j] += *(training_inputs +i*numInputs + k) * deltaHidden[j]*lr;
+                for(int k=0; k<num_input_nodes; k++) {
+                    hiddenWeights[k *num_hidden_nodes + j] += *(training_inputs +i*num_input_nodes + k) * deltaHidden[j]*lr;
                 }
             }
             //*/
@@ -435,10 +435,10 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
     }
 
     // saves weights
-    saveWeights(numInputs, numHiddenNodes, hiddenWeights,"W_Data/weightsHidden.dat");
-    saveWeights(numHiddenNodes, numOutputs, outputWeights, "W_Data/weightsOutput.dat");
-    saveBias(numHiddenNodes, hiddenLayerBias,"W_Data/bias_hidden.dat" );
-    saveBias(numOutputs, outputLayerBias,"W_Data/bias_output.dat" );
+    saveWeights(num_input_nodes, num_hidden_nodes, hiddenWeights,"W_Data/weightsHidden.dat");
+    saveWeights(num_hidden_nodes, num_output_nodes, outputWeights, "W_Data/weightsOutput.dat");
+    saveBias(num_hidden_nodes, hiddenLayerBias,"W_Data/bias_hidden.dat" );
+    saveBias(num_output_nodes, outputLayerBias,"W_Data/bias_output.dat" );
 
     free(hiddenLayerBias);
     free(outputLayerBias);
@@ -459,43 +459,43 @@ int trainData_2(double training_inputs[], double training_outputs[], int numTrai
     
     {
     
-    int numInputs = 784;
-    int numOutputs = 5;
+    int num_input_nodes = 784;
+    int num_output_nodes = 5;
 
 
-    double hiddenLayer[numHiddenNodes];
-    double* outputLayer= malloc(sizeof(double) * numOutputs) ; //[numOutputs];
+    double hiddenLayer[num_hidden_nodes];
+    double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
     
-    double* hiddenLayerBias = malloc(sizeof(double) * numHiddenNodes);
-    double* outputLayerBias= malloc(sizeof(double) * numOutputs);
+    double* hiddenLayerBias = malloc(sizeof(double) * num_hidden_nodes);
+    double* outputLayerBias= malloc(sizeof(double) * num_output_nodes);
 
-    double* hiddenWeights = malloc( sizeof(double) * numInputs * numHiddenNodes);\
-    double* outputWeights = malloc(sizeof(double) * numHiddenNodes * numOutputs);
+    double* hiddenWeights = malloc( sizeof(double) * num_input_nodes * num_hidden_nodes);\
+    double* outputWeights = malloc(sizeof(double) * num_hidden_nodes * num_output_nodes);
    
    // Sets randoms if flag
    if (1 == 0) {
-        for (int i=0; i<numInputs; i++) {
-            for (int j=0; j<numHiddenNodes; j++) {
-                hiddenWeights[i *numHiddenNodes + j] = init_weight();
+        for (int i=0; i<num_input_nodes; i++) {
+            for (int j=0; j<num_hidden_nodes; j++) {
+                hiddenWeights[i *num_hidden_nodes + j] = init_weight();
             }
         }
-        for (int i=0; i<numHiddenNodes; i++) {
+        for (int i=0; i<num_hidden_nodes; i++) {
             hiddenLayerBias[i] = init_weight();
-            for (int j=0; j<numOutputs; j++) {
-                outputWeights[i * numOutputs + j] = init_weight();
+            for (int j=0; j<num_output_nodes; j++) {
+                outputWeights[i * num_output_nodes + j] = init_weight();
             }
         }
-        for (int i=0; i<numOutputs; i++) {
+        for (int i=0; i<num_output_nodes; i++) {
         outputLayerBias[i] = init_weight();
     }
 
 
    } else {
        
-       hiddenWeights = loadWeights(numInputs, numHiddenNodes,"W_Data/weightsHidden.dat" , hiddenWeights);
-       outputWeights = loadWeights(numHiddenNodes, numOutputs, "W_Data/weightsHidden.dat", outputWeights);
-       hiddenLayerBias = loadBias(numHiddenNodes, "W_Data/bias_hidden.dat");
-       outputLayerBias = loadBias(numOutputs,"W_Data/bias_output.dat");
+       hiddenWeights = loadWeights(num_input_nodes, num_hidden_nodes,"W_Data/weightsHidden.dat" , hiddenWeights);
+       outputWeights = loadWeights(num_hidden_nodes, num_output_nodes, "W_Data/weightsHidden.dat", outputWeights);
+       hiddenLayerBias = loadBias(num_hidden_nodes, "W_Data/bias_hidden.dat");
+       outputLayerBias = loadBias(num_output_nodes,"W_Data/bias_output.dat");
 
    }
 
@@ -521,18 +521,18 @@ int trainData_2(double training_inputs[], double training_outputs[], int numTrai
             i = trainingSetOrder[x];
 
             
-            for (int j=0; j<numHiddenNodes; j++) {
+            for (int j=0; j<num_hidden_nodes; j++) {
                 double activation=hiddenLayerBias[j];
-                 for (int k=0; k<numInputs; k++) {
-                    activation+= ( PIXEL_SCALE(*(training_inputs +i*numInputs + k))  * hiddenWeights[k *numHiddenNodes + j]);
+                 for (int k=0; k<num_input_nodes; k++) {
+                    activation+= ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k *num_hidden_nodes + j]);
                 }
                 hiddenLayer[j] = sigmoid(activation);
             }
             
-            for (int j=0; j<numOutputs; j++) {
+            for (int j=0; j<num_output_nodes; j++) {
                 double activation=outputLayerBias[j];
-                for (int k=0; k<numHiddenNodes; k++) {
-                    activation += hiddenLayer[k]*outputWeights[k * numOutputs + j];
+                for (int k=0; k<num_hidden_nodes; k++) {
+                    activation += hiddenLayer[k]*outputWeights[k * num_output_nodes + j];
                 }
                 outputLayer[j] = sigmoid(activation);
             }
@@ -543,7 +543,7 @@ int trainData_2(double training_inputs[], double training_outputs[], int numTrai
             } else {
                 incorrect++;
             }
-            printf("Label: %s", testing_get_letter(training_outputs +i*numOutputs));
+            printf("Label: %s", testing_get_letter(training_outputs +i*num_output_nodes));
             printf("Label: %s", testing_get_letter(outputLayer));
 
         }
@@ -551,10 +551,10 @@ int trainData_2(double training_inputs[], double training_outputs[], int numTrai
     }
 
     // saves weights
-    saveWeights(numInputs, numHiddenNodes, hiddenWeights,"W_Data/weightsHidden.dat");
-    saveWeights(numHiddenNodes, numOutputs, outputWeights, "W_Data/weightsOutput.dat");
-    saveBias(numHiddenNodes, hiddenLayerBias,"W_Data/bias_hidden.dat" );
-    saveBias(numOutputs, outputLayerBias,"W_Data/bias_output.dat" );
+    saveWeights(num_input_nodes, num_hidden_nodes, hiddenWeights,"W_Data/weightsHidden.dat");
+    saveWeights(num_hidden_nodes, num_output_nodes, outputWeights, "W_Data/weightsOutput.dat");
+    saveBias(num_hidden_nodes, hiddenLayerBias,"W_Data/bias_hidden.dat" );
+    saveBias(num_output_nodes, outputLayerBias,"W_Data/bias_output.dat" );
 
     free(hiddenLayerBias);
     free(outputLayerBias);
@@ -612,7 +612,7 @@ double* setOuputData(double* training_outputs ,int numTrainingSets,
 
     
     int counter = 0;
-    int max = numTrainingSets * numOutputs;
+    int max = numTrainingSets * num_output_nodes;
     while ((!feof(file)) && (counter < max)) {
         fscanf(file, "%lf", &training_outputs[counter]);
         counter++;
