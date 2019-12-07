@@ -3,7 +3,7 @@
 //  NeuralNetwork
 //
 //  Created by Daniel Alvarado Bonilla
-//
+//  Based in:  https://towardsdatascience.com/simple-neural-network-implementation-in-c-663f51447547
 //
 
 #include <stdio.h>
@@ -306,10 +306,12 @@ int correct_guess(double* network_output, double* label, int img ) {
  *  (Not loaded only on the first batch in the first epoc)
  * 
  */ 
-int trainData(double training_inputs[], double training_outputs[], int numTrainingSets, 
+int train(double training_inputs[], double training_outputs[], int numTrainingSets, 
                 int batch, int epocs ) 
     
     {
+
+    
     
     double hiddenLayer[num_hidden_nodes];
     double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
@@ -348,7 +350,7 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
    }
 
     
-
+    // array that stores the order of the batch
     int trainingSetOrder[numTrainingSets];
 
     for (int k =0; k < numTrainingSets; k++) {
@@ -362,17 +364,23 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
 
     printf("\nBATCH %d\n", batch);
 
+
     for (int n=0; n < epocs; n++) {
+
+        // shuffles order
         shuffle(trainingSetOrder,numTrainingSets);
+
+        // iterates through all images of the batch
         for (int x=0; x<numTrainingSets; x++) {
             
+            // image selected
             i = trainingSetOrder[x];
 
             
-            for (int j=0; j<num_hidden_nodes; j++) {
-                double activation=hiddenLayerBias[j];
-                 for (int k=0; k<num_input_nodes; k++) {
-                    activation+= ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k *num_hidden_nodes + j]);
+            for (int j=0; j< num_hidden_nodes; j++) {
+                double activation = hiddenLayerBias[j];
+                 for (int k=0; k < num_input_nodes; k++) {
+                    activation += ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k * num_hidden_nodes + j]);
                 }
                 hiddenLayer[j] = sigmoid(activation);
             }
@@ -380,7 +388,7 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
             for (int j=0; j<num_output_nodes; j++) {
                 double activation=outputLayerBias[j];
                 for (int k=0; k<num_hidden_nodes; k++) {
-                    activation += hiddenLayer[k]*outputWeights[k * num_output_nodes + j];
+                    activation += hiddenLayer[k] * outputWeights[k * num_output_nodes + j];
                 }
                 outputLayer[j] = sigmoid(activation);
             }
@@ -397,8 +405,9 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
     
             double deltaOutput[num_output_nodes];
             for (int j=0; j<num_output_nodes; j++) {
+                // training output refers to wanted output
                 double errorOutput = (*(training_outputs +i*num_output_nodes + j) -outputLayer[j]);
-                deltaOutput[j] = errorOutput*dSigmoid(outputLayer[j]);
+                deltaOutput[j] = errorOutput * dSigmoid(outputLayer[j]);
             }
             
             double deltaHidden[num_hidden_nodes];
@@ -407,13 +416,13 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
                 for(int k=0; k<num_output_nodes; k++) {
                     errorHidden += deltaOutput[k] * outputWeights[j * num_output_nodes +k];
                 }
-                deltaHidden[j] = errorHidden*dSigmoid(hiddenLayer[j]);
+                deltaHidden[j] = errorHidden * dSigmoid(hiddenLayer[j]);
             }
             
             for (int j=0; j<num_output_nodes; j++) {
-                outputLayerBias[j] += deltaOutput[j]*lr;
+                outputLayerBias[j] += deltaOutput[j] * learning_rate;
                 for (int k=0; k<num_hidden_nodes; k++) {
-                    outputWeights[k * num_output_nodes + j]+=hiddenLayer[k] * deltaOutput[j] * lr;
+                    outputWeights[k * num_output_nodes + j] += hiddenLayer[k] * deltaOutput[j] * lr;
                 }
             }
             
@@ -654,8 +663,7 @@ void executeNNtesting(int amount, int numTrainingSets) {
 
 }
 
-void executeNNtraining(int amount, int numTrainingSets ,int first_time, char path_td[]
-            ,char path_od[]) {
+void executeNNtraining(int amount, int numTrainingSets ,int first_time, char path_td[], char path_od[]) {
 
 
     double* training_inputs = malloc(sizeof(double) * numTrainingSets * num_input_nodes);
@@ -664,7 +672,7 @@ void executeNNtraining(int amount, int numTrainingSets ,int first_time, char pat
     training_inputs = setTrainingData(training_inputs, numTrainingSets, num_input_nodes, path_td);
     training_outputs = setOuputData(training_outputs, numTrainingSets, num_output_nodes, path_od);
     
-    trainData(training_inputs, training_outputs, numTrainingSets, first_time, amount);
+    train(training_inputs, training_outputs, numTrainingSets, first_time, amount);
     
     free(training_inputs);
     free(training_outputs);
@@ -701,7 +709,7 @@ int main(int argc, const char * argv[]) {
         //printf("%s\n",label_path);
         //executeNNtesting()    
 
-        executeNNtraining(100, batch_size,i,batch_path, label_path);
+        executeNNtraining(100, batch_size, i, batch_path, label_path);
         //executeNNtesting(1, 3); 
     }
     //*/

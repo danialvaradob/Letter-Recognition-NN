@@ -180,17 +180,11 @@ class ImageHandler:
         
         folder_path = Path('Data')
 
-        
-        # new folder path
-        folder_path_aug = Path('AugData')
-
         # the number of file to generate
         num_files_desired = 50
 
         # loop on all files of the folder and build a list of files paths
         images = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-
-        imageNames = os.listdir(folder_path)
 
         num_generated_files = 0
         

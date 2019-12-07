@@ -5,7 +5,7 @@ static const int num_input_nodes = 784;
 static const int num_hidden_nodes = 64;
 static const int num_output_nodes = 7;
 static const int amount_of_batches = 79;
-const double lr = 0.1f;
+const double learning_rate = 1.15f;
 
 double sigmoid(double x);
 double dSigmoid(double x);
