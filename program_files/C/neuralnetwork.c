@@ -162,7 +162,10 @@ void test_w() {
 
 }
 
-
+/**
+ * Given an output of num_output_nodes
+ * Returns the Letter with the highest output 
+ */ 
 char* testing_get_letter(double* output) {
     int letter_pos;
     int highest = 0;
@@ -194,6 +197,15 @@ char* testing_get_letter(double* output) {
         case 4:
                 letter = "E";
                 break;
+        case 5:
+                letter = "F";
+                break;
+        case 6:
+                letter = " ";
+                break;
+        case 7:
+                letter = "^";
+                break;
     }
 
     return letter;
@@ -211,11 +223,6 @@ char* testing_get_letter(double* output) {
 void testing_data(double training_inputs[], double training_outputs[], int num_images, int inputSize, int outputSize) {
 
     
-    
-    int num_input_nodes = 784;
-    int num_output_nodes = 5;
-
-
     double hiddenLayer[num_hidden_nodes];
     double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
     
@@ -274,7 +281,10 @@ void testing_data(double training_inputs[], double training_outputs[], int num_i
 
     }
 
-
+/**
+ * Method used to compare the network output and the label
+ * If they're equal, means the network made a correct guess.
+ */ 
 int correct_guess(double* network_output, double* label, int img ) {
     int correct = 1;
     for (int i = 0; i < num_output_nodes; i++) {
@@ -283,8 +293,6 @@ int correct_guess(double* network_output, double* label, int img ) {
         }
     }
     return correct;
-    
-
 }
 
 
@@ -298,14 +306,11 @@ int correct_guess(double* network_output, double* label, int img ) {
  *  (Not loaded only on the first batch in the first epoc)
  * 
  */ 
-int trainData(double training_inputs[], double training_outputs[], int numTrainingSets, int batch, int epocs ) 
+int trainData(double training_inputs[], double training_outputs[], int numTrainingSets, 
+                int batch, int epocs ) 
     
     {
     
-    int num_input_nodes = 784;
-    int num_output_nodes = 5;
-
-
     double hiddenLayer[num_hidden_nodes];
     double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
     
@@ -386,17 +391,6 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
             } else {
                 incorrect++;
             }
-
-            /*
-           if ((n == 0 ) || (n == epocs/2) || (n == epocs - 1) ) {
-                printf("Epoc:%d ", n);
-                printf("Batch:%d\n", batch);
-                printf("         Output:%lf,%lf,%lf,%lf,%lf\n", outputLayer[0], outputLayer[1], outputLayer[2], outputLayer[3], outputLayer[4]);
-                printf("Expected Output:%lf,%lf,%lf,%lf,%lf\n", 
-                training_outputs[i * num_output_nodes + 0], training_outputs[i * num_output_nodes + 1], training_outputs[i * num_output_nodes + 2],
-                training_outputs[i * num_output_nodes + 3],training_outputs[i * num_output_nodes + 4]);
-                }
-            //*/
            
            // Backprop
         
@@ -455,13 +449,15 @@ int trainData(double training_inputs[], double training_outputs[], int numTraini
 
 }
 
-int trainData_2(double training_inputs[], double training_outputs[], int numTrainingSets, int batch, int epocs ) 
+
+
+/**
+ * Method used to test a group of images
+ */ 
+int test_image_group(double training_inputs[], double training_outputs[], int numTrainingSets, int batch, int epocs ) 
     
     {
     
-    int num_input_nodes = 784;
-    int num_output_nodes = 5;
-
 
     double hiddenLayer[num_hidden_nodes];
     double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
@@ -660,17 +656,13 @@ void executeNNtesting(int amount, int numTrainingSets) {
 
 void executeNNtraining(int amount, int numTrainingSets ,int first_time, char path_td[]
             ,char path_od[]) {
-    // amount of data
-    //int numTrainingSets = 32;
-    int inputSize = 784;
-    int outputSize = 5;
 
 
-    double* training_inputs = malloc(sizeof(double) * numTrainingSets * inputSize);
-    double* training_outputs = malloc(sizeof(double) * numTrainingSets * outputSize);
+    double* training_inputs = malloc(sizeof(double) * numTrainingSets * num_input_nodes);
+    double* training_outputs = malloc(sizeof(double) * numTrainingSets * num_output_nodes);
 
-    training_inputs = setTrainingData(training_inputs, numTrainingSets, inputSize, path_td);
-    training_outputs = setOuputData(training_outputs, numTrainingSets, outputSize, path_od);
+    training_inputs = setTrainingData(training_inputs, numTrainingSets, num_input_nodes, path_td);
+    training_outputs = setOuputData(training_outputs, numTrainingSets, num_output_nodes, path_od);
     
     trainData(training_inputs, training_outputs, numTrainingSets, first_time, amount);
     
@@ -678,37 +670,6 @@ void executeNNtraining(int amount, int numTrainingSets ,int first_time, char pat
     free(training_outputs);
 
 }
-
-
-
-
-
-
-/**
- * Method used to test different functions
- * 
- */ 
-void test() {
-
-
-    int numTrainingSets = 32;
-    int inputSize = 784;
-    int outputSize = 5;
-
-
-    double* training_inputs = malloc(sizeof(double) * numTrainingSets * inputSize);
-    //double* training_outputs = malloc(sizeof(numTrainingSets * outputSize));
-
-    training_inputs = setTrainingData(training_inputs, numTrainingSets, inputSize, "Data/batch60.txt");
-    //training_outputs = setOuputData(training_outputs, numTrainingSets, outputSize, "label0.txt");
-    
-    //trainData(training_inputs, training_outputs, numTrainingSets, first_time, amount);
-    
-    free(training_inputs);
-    //free(training_outputs);
-
-}
-
 
 
 
@@ -722,7 +683,7 @@ int main(int argc, const char * argv[]) {
     int epochs = 1000;
 
     ///*
-    for (int i = 0; i <= 79; i++) {
+    for (int i = 0; i <= amount_of_batches; i++) {
         int batch_size = 32;
         if (i == 79) {
             batch_size = 2;
@@ -740,8 +701,8 @@ int main(int argc, const char * argv[]) {
         //printf("%s\n",label_path);
         //executeNNtesting()    
 
-        //executeNNtraining(100, batch_size,i,batch_path, label_path);
-        executeNNtesting(1, 3); 
+        executeNNtraining(100, batch_size,i,batch_path, label_path);
+        //executeNNtesting(1, 3); 
     }
     //*/
 
