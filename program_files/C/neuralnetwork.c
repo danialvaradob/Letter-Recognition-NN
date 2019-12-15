@@ -203,9 +203,6 @@ char* testing_get_letter(double* output) {
         case 6:
                 letter = " ";
                 break;
-        case 7:
-                letter = "^";
-                break;
     }
 
     return letter;

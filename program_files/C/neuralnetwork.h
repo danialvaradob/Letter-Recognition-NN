@@ -3,7 +3,7 @@
 // NEURAL NETWORK HYPERPARAMETERS
 static const int num_input_nodes = 784;
 static const int num_hidden_nodes = 64;
-static const int num_output_nodes = 7;
+static const int num_output_nodes = 6;
 static const int amount_of_batches = 79;
 const double learning_rate = 1.15f;
 

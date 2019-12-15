@@ -21,16 +21,45 @@ def saveArrayIntoFile(array, f):
 def get_label( string):
     value = []
     if "dataA" in string:
-        value = [1, 0, 0, 0, 0]
+        value = [1, 0, 0, 0, 0, 0]
+        print("A")
     elif "dataB" in string:
-        value = [0, 1, 0, 0, 0]
+        value = [0, 1, 0, 0, 0, 0]
+        print("B")
     elif "dataC" in string:
-        value = [0, 0, 1, 0, 0]
+        value = [0, 0, 1, 0, 0, 0]
+        print("C")
     elif "dataD" in string:
-        value = [0, 0, 0, 1, 0]
-    elif "dataE" in string:
-        value = [0, 0, 0, 0, 1]
+        value = [0, 0, 0, 1, 0, 0]
+        print("D")
 
+    elif "dataE" in string:
+        value = [0, 0, 0, 0, 1, 0]
+        print("E")
+
+    elif "DBE-A" in string:
+        value = [1, 0, 0, 0, 0, 0]
+        print("A")
+
+    elif "DBE-B" in string:
+        value = [0, 1, 0, 0, 0, 0]
+        print("B")
+
+    elif "DBE-C" in string:
+        value = [0, 0, 1, 0, 0, 0]
+        print("C")
+
+    elif "DBE-D" in string:
+        value = [0, 0, 0, 1, 0, 0]
+        print("D")
+        
+    elif "E1" in string:
+        value = [0, 0, 0, 0, 1, 0]
+        print("E")
+
+    elif "F1" in string:
+        value = [0, 0, 0, 0, 0, 1]
+        print("F")
     return value
 
 
