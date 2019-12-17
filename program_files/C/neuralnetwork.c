@@ -709,7 +709,7 @@ int main(int argc, const char * argv[]) {
     for (int batch = 0; batch <= amount_of_batches; batch++) {
         int batch_size = 32;
         if (batch == 79) {
-            batch_size = 2;
+            batch_size = 15;
         }
         digits = 2;
         if (batch/10 <= 0) digits = 1;
