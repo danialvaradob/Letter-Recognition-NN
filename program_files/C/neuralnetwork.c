@@ -20,8 +20,9 @@
 Activation Function
 Derivative of AF
 */
+double a = 1;
 double sigmoid(double x) {
-    return 1 / (1 + exp(-x)); 
+    return 1 / (1 + exp(-x * a)); 
 }
 
 double dSigmoid(double x) {
@@ -282,13 +283,15 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
             for (int j=0; j< num_hidden_nodes; j++) {
                 double activation = hiddenLayerBias[j];
                  for (int k=0; k < num_input_nodes; k++) {
-                    activation += ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k * num_hidden_nodes + j]);
+                    activation += (PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k * num_hidden_nodes + j]);
                 }
                 hiddenLayer[j] = sigmoid(activation);
             }
 
             printf("Hidden Weight 0: %lf\n", hiddenWeights[0]);
-
+            printf("Hidden Weight 1: %lf\n", hiddenWeights[1]);
+            printf("Hidden Weight 2: %lf\n", hiddenWeights[2]);
+            printf("Hidden Weight 3: %lf\n", hiddenWeights[3]);
 
             for (int j=0; j<num_output_nodes; j++) {
                 double activation=outputLayerBias[j];
@@ -298,7 +301,8 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
                 outputLayer[j] = sigmoid(activation);
             }
 
-            printf("Output Weight 0: %lf\n", outputWeights[0]);
+            printf("Output Weight 0: %lf\n\n", outputWeights[0]);
+            
 
             if (correct_guess(outputLayer, training_outputs, i)) {
                 correct++;
