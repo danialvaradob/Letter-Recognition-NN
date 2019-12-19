@@ -96,16 +96,21 @@ def img_to_txt_NN():
 
         batch_name = "batch%i.txt" % (batch_n)
         batch_name_labels = "label%i.txt" % (batch_n)
-        
+        imgs_name = "file_names%i.txt" % (batch_n)
         
 
 
         batch_file = open(batch_name, mode='a')
         label_file = open(batch_name_labels, mode ='a')
+        imgs_name_file = open(imgs_name, mode ='a')
+        
 
         for i in range(batch_size):
             img_name = batch_img_paths[i]
             img_label = get_label(img_name)
+
+            # writes name into a file
+            imgs_name_file.write(img_name + "\n")
 
             #image_array = []
             current_image = images_path + img_name

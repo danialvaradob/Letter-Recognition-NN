@@ -67,6 +67,11 @@ double* loadWeights(int rows, int cols, char path[], double* weights) {
 
     fclose(file);
 
+    printf("Weight 1: %lf", weights[0]);
+    printf("Weight 2: %lf", weights[1]);
+    
+
+
     return weights;
 }
 
@@ -211,73 +216,6 @@ char* testing_get_letter(double* output) {
 }
 
 
-
-/**
- * 
- * Method used to test data
- * 
- */ 
-void testing_data(double training_inputs[], double training_outputs[], int num_images, int inputSize, int outputSize) {
-
-    
-    double hiddenLayer[num_hidden_nodes];
-    double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
-    
-    double* hiddenLayerBias = malloc(sizeof(double) * num_hidden_nodes);
-    double* outputLayerBias= malloc(sizeof(double) * num_output_nodes);
-
-    // hiddenWeights[num_input_nodes][num_hidden_nodes]
-    double* hiddenWeights = malloc( sizeof(double) * num_input_nodes * num_hidden_nodes);
-    //double outputWeights[num_hidden_nodes][num_output_nodes];
-    double* outputWeights = malloc(sizeof(double) * num_hidden_nodes * num_output_nodes);
-   
-    hiddenWeights = loadWeights(num_input_nodes, num_hidden_nodes,"W_Data/weightsHidden.dat" , hiddenWeights);
-    outputWeights = loadWeights(num_hidden_nodes, num_output_nodes, "W_Data/weightsHidden.dat", outputWeights);
-    hiddenLayerBias = loadBias(num_hidden_nodes, "W_Data/bias_hidden.dat");
-    outputLayerBias = loadBias(num_output_nodes,"W_Data/bias_output.dat");
-
-    
-    int i;
-
-    int correct = 0;
-    int incorrect = 0;
-
-        for (int i=0; i < num_images; i++) {
-            
-            // Forward pass (only - testing)
-            
-            for (int j=0; j < num_hidden_nodes; j++) {
-                double activation=hiddenLayerBias[j];
-                 for (int k=0; k<num_input_nodes; k++) {
-                    activation+= ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k *num_hidden_nodes + j]);
-                }
-                hiddenLayer[j] = sigmoid(activation);
-            }
-            
-            for (int j=0; j<num_output_nodes; j++) {
-                double activation=outputLayerBias[j];
-                for (int k=0; k < num_hidden_nodes; k++) {
-                    activation += hiddenLayer[k]*outputWeights[k * num_output_nodes + j];
-                }
-                outputLayer[j] = sigmoid(activation);
-            }
-            printf("Label: %s", testing_get_letter(training_outputs +i*num_output_nodes));
-            printf("Label: %s", testing_get_letter(outputLayer));
-            
-
-
-            
-        }
-
-    
-
-    free(hiddenLayerBias);
-    free(outputLayerBias);
-    free(hiddenWeights);
-    free(outputWeights);
-
-    }
-
 /**
  * Method used to compare the network output and the label
  * If they're equal, means the network made a correct guess.
@@ -348,7 +286,10 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
                 }
                 hiddenLayer[j] = sigmoid(activation);
             }
-            
+
+            printf("Hidden Weight 0: %lf\n", hiddenWeights[0]);
+
+
             for (int j=0; j<num_output_nodes; j++) {
                 double activation=outputLayerBias[j];
                 for (int k=0; k<num_hidden_nodes; k++) {
@@ -357,6 +298,7 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
                 outputLayer[j] = sigmoid(activation);
             }
 
+            printf("Output Weight 0: %lf\n", outputWeights[0]);
 
             if (correct_guess(outputLayer, training_outputs, i)) {
                 correct++;
@@ -369,8 +311,8 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
     
             double deltaOutput[num_output_nodes];
             for (int j=0; j<num_output_nodes; j++) {
-                // training output refers to wanted output
-                double errorOutput = (*(training_outputs +i*num_output_nodes + j) -outputLayer[j]);
+
+                double errorOutput = (*(training_outputs +i * num_output_nodes + j) - outputLayer[j]);
                 deltaOutput[j] = errorOutput * dSigmoid(outputLayer[j]);
             }
             
@@ -386,14 +328,16 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
             for (int j=0; j<num_output_nodes; j++) {
                 outputLayerBias[j] += deltaOutput[j] * learning_rate;
                 for (int k=0; k<num_hidden_nodes; k++) {
-                    outputWeights[k * num_output_nodes + j] += hiddenLayer[k] * deltaOutput[j] * lr;
+                    outputWeights[k * num_output_nodes + j] += hiddenLayer[k] * deltaOutput[j] * learning_rate;
+                    //outputWeights[k * numOutputs + j]+=hiddenLayer[k] * deltaOutput[j] * lr;
                 }
             }
             
             for (int j=0; j<num_hidden_nodes; j++) {
-                hiddenLayerBias[j] += deltaHidden[j]*lr;
+                hiddenLayerBias[j] += deltaHidden[j]*learning_rate;
                 for(int k=0; k<num_input_nodes; k++) {
-                    hiddenWeights[k *num_hidden_nodes + j] += *(training_inputs +i*num_input_nodes + k) * deltaHidden[j]*lr;
+                    hiddenWeights[k *num_hidden_nodes + j] += *(training_inputs +i*num_input_nodes + k) * deltaHidden[j]*learning_rate;
+                    //hiddenWeights[k *numHiddenNodes + j] += *(training_inputs +i*numInputs + k) * deltaHidden[j]*lr;
                 }
             }
             //*/
@@ -412,123 +356,6 @@ int train(double training_inputs[], double training_outputs[], int numTrainingSe
 
 }
 
-
-
-/**
- * Method used to test a group of images
- */ 
-int test_image_group(double training_inputs[], double training_outputs[], int numTrainingSets, int batch, int epocs ) 
-    
-    {
-    
-
-    double hiddenLayer[num_hidden_nodes];
-    double* outputLayer= malloc(sizeof(double) * num_output_nodes) ; //[num_output_nodes];
-    
-    double* hiddenLayerBias = malloc(sizeof(double) * num_hidden_nodes);
-    double* outputLayerBias= malloc(sizeof(double) * num_output_nodes);
-
-    double* hiddenWeights = malloc( sizeof(double) * num_input_nodes * num_hidden_nodes);\
-    double* outputWeights = malloc(sizeof(double) * num_hidden_nodes * num_output_nodes);
-   
-   // Sets randoms if flag
-   if (1 == 0) {
-        for (int i=0; i<num_input_nodes; i++) {
-            for (int j=0; j<num_hidden_nodes; j++) {
-                hiddenWeights[i *num_hidden_nodes + j] = init_weight();
-            }
-        }
-        for (int i=0; i<num_hidden_nodes; i++) {
-            hiddenLayerBias[i] = init_weight();
-            for (int j=0; j<num_output_nodes; j++) {
-                outputWeights[i * num_output_nodes + j] = init_weight();
-            }
-        }
-        for (int i=0; i<num_output_nodes; i++) {
-        outputLayerBias[i] = init_weight();
-    }
-
-
-   } else {
-       
-       hiddenWeights = loadWeights(num_input_nodes, num_hidden_nodes,"W_Data/weightsHidden.dat" , hiddenWeights);
-       outputWeights = loadWeights(num_hidden_nodes, num_output_nodes, "W_Data/weightsHidden.dat", outputWeights);
-       hiddenLayerBias = loadBias(num_hidden_nodes, "W_Data/bias_hidden.dat");
-       outputLayerBias = loadBias(num_output_nodes,"W_Data/bias_output.dat");
-
-   }
-
-    
-
-    int trainingSetOrder[numTrainingSets];
-
-    for (int k =0; k < numTrainingSets; k++) {
-        trainingSetOrder[k] = k;
-    }
-    
-    int i;
-
-    int correct = 0;
-    int incorrect = 0;
-
-    printf("\nBATCH %d\n", batch);
-
-    for (int n=0; n < epocs; n++) {
-        shuffle(trainingSetOrder,numTrainingSets);
-        for (int x=0; x<numTrainingSets; x++) {
-            
-            i = trainingSetOrder[x];
-
-            
-            for (int j=0; j<num_hidden_nodes; j++) {
-                double activation=hiddenLayerBias[j];
-                 for (int k=0; k<num_input_nodes; k++) {
-                    activation+= ( PIXEL_SCALE(*(training_inputs +i*num_input_nodes + k))  * hiddenWeights[k *num_hidden_nodes + j]);
-                }
-                hiddenLayer[j] = sigmoid(activation);
-            }
-            
-            for (int j=0; j<num_output_nodes; j++) {
-                double activation=outputLayerBias[j];
-                for (int k=0; k<num_hidden_nodes; k++) {
-                    activation += hiddenLayer[k]*outputWeights[k * num_output_nodes + j];
-                }
-                outputLayer[j] = sigmoid(activation);
-            }
-
-
-            if (correct_guess(outputLayer, training_outputs, i)) {
-                correct++;
-            } else {
-                incorrect++;
-            }
-            printf("Label: %s", testing_get_letter(training_outputs +i*num_output_nodes));
-            printf("Label: %s", testing_get_letter(outputLayer));
-
-        }
-
-    }
-
-    // saves weights
-    saveWeights(num_input_nodes, num_hidden_nodes, hiddenWeights,"W_Data/weightsHidden.dat");
-    saveWeights(num_hidden_nodes, num_output_nodes, outputWeights, "W_Data/weightsOutput.dat");
-    saveBias(num_hidden_nodes, hiddenLayerBias,"W_Data/bias_hidden.dat" );
-    saveBias(num_output_nodes, outputLayerBias,"W_Data/bias_output.dat" );
-
-    free(hiddenLayerBias);
-    free(outputLayerBias);
-    free(hiddenWeights);
-    free(outputWeights);
-
-    
-    printf("Correct Guesses: %d\n", correct);
-    printf("Incorrect Guesses: %d\n", incorrect);
-    float acc = (float)  ((float) correct / ((float) numTrainingSets * (float) epocs));
-    printf("Accuracy:  %f\n",  acc);
-
-
-
-}
 
 
 /**
@@ -578,44 +405,19 @@ double* setOuputData(double* training_outputs ,int numTrainingSets,
         
     }
 
-    //printf("THE NUMBER SCANNED IS:%lf\n", training_outputs[1]);
 
     fclose(file);
+    printf("img1: %lf, %lf, %lf, %lf, %lf, %f", training_outputs[0], training_outputs[1], training_outputs[2],
+                training_outputs[3], training_outputs[4], training_outputs[5]);
+    printf("\nimg2: %lf, %lf, %lf, %lf, %lf, %f", training_outputs[6], training_outputs[7], training_outputs[8],
+                training_outputs[9], training_outputs[10], training_outputs[11]);
+                
+
 
     return training_outputs;
 }
 
 
-/**
- *  Method called by main function
- *  amount refers to the amount of epochs
- *  first time refers to the rand_flag used in trainData()
- *  paths refer to the batch paths
- * 
- */ 
-void executeNNtesting(int amount, int numTrainingSets) {
-    // amount of data
-    //int numTrainingSets = 32;
-    int inputSize = 784;
-    int outputSize = 5;
-
-    char path_td[] = "Data/batch00.text";
-    char path_od[] = "Data/label00.text";
-    
-
-    double* training_inputs = malloc(sizeof(double) * numTrainingSets * inputSize);
-    double* training_outputs = malloc(sizeof(double) * numTrainingSets * outputSize);
-
-    training_inputs = setTrainingData(training_inputs, numTrainingSets, inputSize, path_td);
-    training_outputs = setOuputData(training_outputs, numTrainingSets, outputSize, path_od);
-    
-    trainData_2(training_inputs, training_outputs, numTrainingSets, 1, amount);
-    
-    
-    free(training_inputs);
-    free(training_outputs);
-
-}
 
 /**
  * Method that loads the input data (images in each batch) and their respective output (labels)
@@ -658,7 +460,7 @@ void execute_training(int amount, int numTrainingSets ,int first_time, char path
 
    
    } else {
-       
+       printf("Wights loaded");
        hiddenWeights = loadWeights(num_input_nodes, num_hidden_nodes,"W_Data/weightsHidden.dat" , hiddenWeights);
        outputWeights = loadWeights(num_hidden_nodes, num_output_nodes, "W_Data/weightsHidden.dat", outputWeights);
        hiddenLayerBias = loadBias(num_hidden_nodes, "W_Data/bias_hidden.dat");
@@ -699,13 +501,6 @@ int main(int argc, const char * argv[]) {
     int first_time = 1;
     int epochs = 1000;
 
-
-
-    //Loads weights for the first time
-    
-    ///*
-
-
     for (int batch = 0; batch <= amount_of_batches; batch++) {
         int batch_size = 32;
         if (batch == 79) {
@@ -720,10 +515,8 @@ int main(int argc, const char * argv[]) {
         sprintf(batch_path, "Data/batch%d.txt",  batch);
         sprintf(label_path, "Data/label%d.txt",  batch);
 
-        execute_training(100, batch_size, batch, batch_path, label_path);
-        //executeNNtesting(1, 3); 
+        execute_training(epochs, batch_size, batch, batch_path, label_path);
     }
-    //*/
 
     return 0;
 
